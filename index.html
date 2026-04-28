@@ -1,0 +1,768 @@
+
+<style>
+:root{
+  --font-sans:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  --color-text-primary:#1f2937;
+  --color-text-secondary:#6b7280;
+  --color-background-primary:#ffffff;
+  --color-background-secondary:#f6f7f9;
+  --color-border-primary:#6b7280;
+  --color-border-secondary:#c6ccd5;
+  --color-border-tertiary:#e1e5ea;
+  --border-radius-md:12px;
+  --border-radius-lg:18px;
+}
+body{background:#f7f8fb;color:var(--color-text-primary);}
+*{box-sizing:border-box;margin:0;padding:0}
+.app{max-width:720px;margin:0 auto;padding:1.5rem 1rem;font-family:var(--font-sans);font-size:15px;color:var(--color-text-primary)}
+.screen{display:none}.screen.active{display:block}
+.card{background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:1.25rem;margin-bottom:0.875rem}
+h1{font-size:22px;font-weight:500;margin-bottom:0.25rem}
+h2{font-size:18px;font-weight:500;margin-bottom:0.875rem}
+h3{font-size:16px;font-weight:500;margin-bottom:0.5rem}
+.sub{font-size:13px;color:var(--color-text-secondary);margin-bottom:1.25rem;line-height:1.6}
+.badge{display:inline-flex;align-items:center;gap:4px;font-size:12px;padding:3px 10px;border-radius:20px;font-weight:500}
+.cn{background:#fff0f0;color:#a00}.ua{background:#e8f0ff;color:#005BBB}.mn{background:#fff0f0;color:#8B0000}.vn{background:#fff5f0;color:#c01}
+.rule-grid{display:grid;grid-template-columns:1fr 1fr;gap:0.625rem;margin-bottom:1rem}
+.rule-card{border:1.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);padding:0.875rem;cursor:pointer;transition:all 0.12s;user-select:none}
+.rule-card:hover{border-color:var(--color-border-secondary);background:var(--color-background-secondary)}
+.rule-card.selected{border:2px solid #378ADD;background:#e6f1fb18}
+.rule-card .ctry{font-size:12px;margin-bottom:0.375rem}
+.rule-card .rtxt{font-size:14px;font-weight:500;line-height:1.5}
+.emoji-pool{display:flex;flex-wrap:wrap;gap:8px;margin:0.5rem 0}
+.ebtn{font-size:26px;padding:8px 12px;border:1.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);cursor:pointer;background:var(--color-background-primary);transition:all 0.1s;user-select:none;line-height:1}
+.ebtn:hover{border-color:var(--color-border-secondary);background:var(--color-background-secondary)}
+.ebtn.picked{border:2px solid #378ADD;background:#deeeff40}
+.preview-box{min-height:64px;padding:1rem;background:var(--color-background-secondary);border-radius:var(--border-radius-md);text-align:center;font-size:28px;letter-spacing:6px;margin:0.75rem 0;word-break:break-all;line-height:1.7}
+.preview-empty{font-size:14px;color:var(--color-text-secondary);letter-spacing:0}
+.btn{padding:9px 20px;border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-secondary);background:var(--color-background-primary);font-size:14px;cursor:pointer;font-family:var(--font-sans);color:var(--color-text-primary);transition:background 0.1s}
+.btn:hover{background:var(--color-background-secondary)}
+.btn-primary{background:#378ADD;color:#fff;border-color:#378ADD;font-weight:500}
+.btn-primary:hover{background:#185FA5;border-color:#185FA5}
+.btn-danger{background:#E24B4A;color:#fff;border-color:#E24B4A}
+.btn-danger:hover{background:#A32D2D}
+.btn-ghost{background:transparent;border-color:var(--color-border-tertiary);color:var(--color-text-secondary)}
+.btn-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:1rem;align-items:center}
+.steps{display:flex;gap:6px;align-items:center;margin-bottom:1.25rem}
+.dot{width:28px;height:28px;border-radius:50%;border:0.5px solid var(--color-border-tertiary);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:500;color:var(--color-text-secondary);flex-shrink:0}
+.dot.on{background:#378ADD;color:#fff;border-color:#378ADD}
+.dot.ok{background:#639922;color:#fff;border-color:#639922}
+.divider{height:0.5px;background:var(--color-border-tertiary);margin:1rem 0}
+.name-inp{width:100%;padding:9px 12px;border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);font-size:14px;font-family:var(--font-sans);color:var(--color-text-primary);background:var(--color-background-primary)}
+.name-inp:focus{outline:none;border-color:var(--color-border-primary)}
+label{font-size:13px;color:var(--color-text-secondary);display:block;margin-bottom:5px}
+.info{background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:0.875rem 1rem;font-size:14px;line-height:1.7;color:var(--color-text-secondary)}
+.mode-tabs{display:flex;border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);overflow:hidden;margin-bottom:1.25rem}
+.mtab{flex:1;padding:10px;text-align:center;font-size:14px;cursor:pointer;border:none;background:var(--color-background-primary);color:var(--color-text-secondary);font-family:var(--font-sans)}
+.mtab.on{background:var(--color-background-secondary);color:var(--color-text-primary);font-weight:500}
+.mtab:not(:last-child){border-right:0.5px solid var(--color-border-tertiary)}
+.success{background:#eaf3de;border-radius:var(--border-radius-md);padding:1rem 1.25rem;color:#3B6D11;font-weight:500;font-size:15px;text-align:center;margin-bottom:1rem}
+.stat-row{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin:1rem 0}
+.stat{background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:0.875rem;text-align:center}
+.stat-n{font-size:24px;font-weight:500;margin-bottom:2px}
+.stat-l{font-size:12px;color:var(--color-text-secondary)}
+.qitem{border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);padding:0.875rem;margin-bottom:0.625rem;cursor:pointer;transition:border-color 0.1s}
+.qitem:hover{border-color:var(--color-border-secondary)}
+.rtag{font-size:11px;padding:2px 8px;border-radius:12px;border:0.5px solid var(--color-border-tertiary);color:var(--color-text-secondary)}
+.ex-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:0.375rem 0}
+.ex-word{font-size:13px;padding:3px 10px;background:var(--color-background-secondary);border-radius:16px;border:0.5px solid var(--color-border-tertiary)}
+.ex-arr{color:var(--color-text-secondary);font-size:14px}
+.clear-btn{font-size:13px;padding:5px 12px;border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-secondary);background:var(--color-background-primary);cursor:pointer;color:var(--color-text-secondary);font-family:var(--font-sans)}
+.clear-btn:hover{background:#fff0f0;border-color:#E24B4A;color:#A32D2D}
+.emoji-clear-row{display:flex;justify-content:flex-end;gap:6px;flex-wrap:wrap;margin:0.375rem 0 0.5rem}
+.emoji-section-label{font-size:12px;font-weight:500;color:var(--color-text-secondary);padding:6px 0 4px;margin-top:4px;border-top:0.5px solid var(--color-border-tertiary)}
+.emoji-section-label:first-child{border-top:none;margin-top:0;padding-top:0}
+/* 의도 질문 */
+.intent-q{background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:1rem 1.125rem;margin-bottom:0.75rem}
+.intent-q .qnum{font-size:12px;font-weight:500;color:#378ADD;margin-bottom:0.375rem}
+.intent-q .qtxt{font-size:14px;font-weight:500;margin-bottom:0.75rem;line-height:1.6}
+.required-mark{color:#E24B4A;font-size:12px;margin-left:4px}
+/* 이모지 입력 도우미 */
+.emoji-input-wrap{position:relative}
+.emoji-input-area{width:100%;padding:10px 12px;border:0.5px solid var(--color-border-tertiary);border-radius:0 0 var(--border-radius-md) var(--border-radius-md);font-size:15px;font-family:var(--font-sans);color:var(--color-text-primary);background:var(--color-background-primary);line-height:1.7;min-height:72px;resize:vertical}
+.emoji-input-area:focus{outline:none;border-color:var(--color-border-primary)}
+.emoji-insert-bar{display:flex;flex-wrap:wrap;gap:5px;padding:6px 8px;background:var(--color-background-secondary);border:0.5px solid var(--color-border-tertiary);border-bottom:none;border-radius:var(--border-radius-md) var(--border-radius-md) 0 0;margin-bottom:-3px}
+.emoji-insert-bar .bar-label{font-size:11px;color:var(--color-text-secondary);width:100%;padding:2px 0;margin-bottom:2px}
+.ins-btn{font-size:22px;padding:5px 8px;border:1.5px solid var(--color-border-tertiary);border-radius:6px;cursor:pointer;background:var(--color-background-primary);transition:all 0.1s;line-height:1;user-select:none}
+.ins-btn:hover{border-color:#378ADD;background:#e6f1fb30}
+.ins-btn:active{transform:scale(0.92)}
+.backspace-btn{font-size:13px;padding:4px 10px;border:1.5px solid var(--color-border-tertiary);border-radius:6px;cursor:pointer;background:var(--color-background-primary);color:var(--color-text-secondary);font-family:var(--font-sans);transition:all 0.1s;line-height:1.4}
+.backspace-btn:hover{border-color:#E24B4A;color:#A32D2D;background:#fff0f0}
+
+.presentation-emoji{font-size:64px;letter-spacing:12px;padding:2rem 0.5rem;line-height:1.7;word-break:break-word}
+.reveal-card{border-left:3px solid #639922;border-radius:0 var(--border-radius-md) var(--border-radius-md) 0}
+.reveal-section{background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:0.875rem 1rem;margin-top:0.75rem}
+.reveal-label{font-size:12px;font-weight:600;color:#3B6D11;margin-bottom:0.375rem}
+.reveal-text{font-size:14px;line-height:1.7;color:var(--color-text-primary);white-space:pre-wrap}
+.quiz-list-emoji{font-size:32px;letter-spacing:5px;margin:0.5rem 0;line-height:1.6;word-break:break-word}
+</style>
+
+<div class="app">
+<h2 class="sr-only">이모지 퀴즈 수업 앱</h2>
+
+<!-- 시작 -->
+<div id="s-mode" class="screen active">
+  <h1 style="margin-bottom:0.25rem">이모지 퀴즈 만들기</h1>
+  <p class="sub">세계 여러 나라 학교 규칙을 이모지로 표현해요</p>
+  <div class="mode-tabs">
+    <button class="mtab on" onclick="setMode('student',this)">학생</button>
+    <button class="mtab" onclick="setMode('teacher',this)">선생님</button>
+  </div>
+  <div id="d-student" class="card">
+    <h3>내 이름을 써요</h3>
+    <div style="margin-top:0.75rem"><label>이름</label><input class="name-inp" id="sname" placeholder="예) 김민준"/></div>
+    <div class="btn-row"><button class="btn btn-primary" onclick="startStudent()">시작하기 →</button></div>
+  </div>
+  <div id="d-teacher" class="card" style="display:none">
+    <h3>선생님 화면</h3>
+    <p style="font-size:14px;color:var(--color-text-secondary);margin:0.5rem 0 1rem;line-height:1.6">학생들이 제출한 퀴즈를 확인하고 함께 풀어봐요.</p>
+    <div class="btn-row"><button class="btn btn-primary" onclick="startTeacher()">선생님 화면 열기 →</button></div>
+  </div>
+</div>
+
+<!-- 1단계: 규칙 고르기 -->
+<div id="s-rule" class="screen">
+  <div class="steps"><div class="dot on">1</div><div class="dot">2</div><div class="dot">3</div><span style="font-size:13px;color:var(--color-text-secondary)">규칙 고르기</span></div>
+  <h2>어떤 나라 규칙을 소개하고 싶나요?</h2>
+  <div class="card" style="border-left:3px solid #378ADD;border-radius:0 var(--border-radius-md) var(--border-radius-md) 0;margin-bottom:1.25rem">
+    <h3 style="color:#185FA5">이모지 퀴즈가 뭔가요?</h3>
+    <p style="font-size:14px;color:var(--color-text-secondary);margin:0.375rem 0 1rem;line-height:1.7">
+      학교 규칙을 <strong style="color:var(--color-text-primary)">이모지(그림 문자)만</strong> 사용해서 표현하고, 친구들이 맞히는 퀴즈예요.<br>
+      <strong style="color:#E24B4A">글자는 쓸 수 없어요!</strong> 이모지만으로 누구나 이해할 수 있게 만드는 게 핵심이에요.
+    </p>
+    <div style="font-size:13px;font-weight:500;color:var(--color-text-primary);margin-bottom:0.625rem">예시 — 중국에서는 밥 먹고 나서 학교에서 낮잠을 자요 (2시간!)</div>
+    <div style="background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:1rem">
+      <div style="font-size:13px;color:var(--color-text-secondary);margin-bottom:0.625rem;font-weight:500">각 내용을 이렇게 이모지로 나타냈어요:</div>
+      <div class="ex-row"><span class="ex-word">학교</span><span class="ex-arr">→</span><span style="font-size:20px">🏫</span></div>
+      <div class="ex-row"><span class="ex-word">밥 먹기</span><span class="ex-arr">→</span><span style="font-size:20px">🍜</span></div>
+      <div class="ex-row"><span class="ex-word">낮잠 자기</span><span class="ex-arr">→</span><span style="font-size:20px">😴</span></div>
+      <div class="ex-row"><span class="ex-word">2시간</span><span class="ex-arr">→</span><span style="font-size:20px">2️⃣⏰</span></div>
+      <div class="divider"></div>
+      <div style="font-size:13px;font-weight:500;margin-bottom:0.5rem">완성된 퀴즈</div>
+      <div style="font-size:26px;letter-spacing:5px">🏫 🍜 😴 2️⃣⏰</div>
+      <div style="margin-top:0.875rem;padding:0.75rem;background:var(--color-background-primary);border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-tertiary)">
+        <div style="font-size:12px;font-weight:500;color:#378ADD;margin-bottom:0.375rem">이렇게 표현한 이유</div>
+        <div style="font-size:13px;color:var(--color-text-secondary);line-height:1.7">낮잠을 자는 모습은 😴로 바로 알 수 있어요.<br>숫자 2️⃣와 시계 ⏰를 함께 써서 "2시간"을 나타냈어요.<br>이렇게 하면 글자 없이도 모두가 이해할 수 있어요!</div>
+      </div>
+    </div>
+    <div style="margin-top:0.875rem;padding:0.75rem 1rem;background:#fff8e6;border-radius:var(--border-radius-md);border:0.5px solid #F5A623">
+      <div style="font-size:13px;font-weight:500;color:#854F0B;margin-bottom:0.25rem">퀴즈를 만들 때 꼭 생각해봐요!</div>
+      <div style="font-size:13px;color:#633806;line-height:1.7">글자 없이 이모지만 봐도 친구들이 바로 이해할 수 있나요?<br>어떤 이모지를 왜 골랐는지 설명할 수 있나요?</div>
+    </div>
+  </div>
+  <p style="font-size:14px;font-weight:500;margin-bottom:0.75rem">규칙을 하나 골라요!</p>
+  <div class="rule-grid" id="rule-grid"></div>
+  <div class="btn-row">
+    <button class="btn btn-ghost" onclick="go('s-mode')">← 돌아가기</button>
+    <button class="btn btn-primary" onclick="toEmoji()">다음 →</button>
+  </div>
+</div>
+
+<!-- 2단계: 이모지 고르기 -->
+<div id="s-emoji" class="screen">
+  <div class="steps"><div class="dot ok">✓</div><div class="dot on">2</div><div class="dot">3</div><span style="font-size:13px;color:var(--color-text-secondary)">이모지 퀴즈 만들기</span></div>
+  <h2>이모지로 규칙을 표현해요</h2>
+  <div class="card" style="margin-bottom:0.75rem">
+    <div style="font-size:13px;color:var(--color-text-secondary);margin-bottom:0.25rem">내가 고른 규칙</div>
+    <div id="sel-badge"></div>
+    <div id="sel-text" style="font-size:14px;font-weight:500;margin-top:0.375rem;line-height:1.5"></div>
+  </div>
+  <div class="card">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.375rem">
+      <h3 style="margin-bottom:0">이모지를 골라요</h3>
+    </div>
+    <p style="font-size:13px;color:var(--color-text-secondary);margin-bottom:0.75rem;line-height:1.6">누르면 선택, 다시 누르면 취소돼요.</p>
+    <div id="epicker"></div>
+    <div class="divider"></div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.25rem">
+      <span style="font-size:13px;font-weight:500">내 퀴즈 미리보기</span>
+      <span style="font-size:12px;color:var(--color-text-secondary)" id="emoji-count">0개 선택</span>
+    </div>
+    <div class="emoji-clear-row">
+      <button class="clear-btn" onclick="removeLastEmoji()">마지막 이모지 지우기</button>
+      <button class="clear-btn" onclick="clearEmojis()">전체 이모지 지우기</button>
+    </div>
+    <div class="preview-box" id="preview"><span class="preview-empty">이모지를 누르면 여기에 나타나요</span></div>
+  </div>
+
+  <!-- 의도 질문 — 이모지 삽입 가능 텍스트 입력 -->
+  <div class="card">
+    <h3>내 퀴즈를 설명해요</h3>
+    <p style="font-size:13px;color:var(--color-text-secondary);margin:0.25rem 0 1rem;line-height:1.6">
+      아래 질문에 대답하면 퀴즈를 제출할 수 있어요!<br>
+      <strong style="color:#378ADD;font-weight:500">입력창 위 이모지 버튼을 누르면 글 안에 바로 넣을 수 있어요.</strong>
+    </p>
+
+    <div class="intent-q">
+      <div class="qnum">질문 1 <span class="required-mark">*필수</span></div>
+      <div class="qtxt">내가 고른 이모지들이 규칙의 어떤 부분을 나타내는지 설명해 보세요.<br><span style="font-size:13px;font-weight:400;color:var(--color-text-secondary)">(어떤 이모지로 어떤 내용을 표현했나요?)</span></div>
+      <div class="emoji-input-wrap">
+        <div class="emoji-insert-bar" id="bar-q1">
+          <div class="bar-label">내가 고른 이모지를 눌러서 넣어요 →</div>
+        </div>
+        <textarea class="emoji-input-area" id="q1" placeholder="예) 🏫는 학교, 🍜는 밥 먹기, 😴는 낮잠, 2️⃣⏰는 2시간을 나타냈어요."></textarea>
+      </div>
+    </div>
+
+    <div class="intent-q">
+      <div class="qnum">질문 2 <span class="required-mark">*필수</span></div>
+      <div class="qtxt">가장 신경 써서 고른 이모지는 무엇이고, 왜 그 이모지를 골랐나요?</div>
+      <div class="emoji-input-wrap">
+        <div class="emoji-insert-bar" id="bar-q2">
+          <div class="bar-label">내가 고른 이모지를 눌러서 넣어요 →</div>
+        </div>
+        <textarea class="emoji-input-area" id="q2" placeholder="예) 2️⃣⏰를 가장 고민했어요. 숫자와 시계를 함께 써서 2시간을 나타냈어요."></textarea>
+      </div>
+    </div>
+
+    <div class="intent-q" style="margin-bottom:0">
+      <div class="qnum">질문 3</div>
+      <div class="qtxt">친구들이 내 퀴즈를 보고 바로 이해할 수 있을까요? 헷갈릴 수 있는 부분이 있다면 어떻게 바꾸면 좋을지 써봐요.</div>
+      <div class="emoji-input-wrap">
+        <div class="emoji-insert-bar" id="bar-q3">
+          <div class="bar-label">내가 고른 이모지를 눌러서 넣어요 →</div>
+        </div>
+        <textarea class="emoji-input-area" id="q3" placeholder="예) 😴가 그냥 '피곤하다'로 보일 수 있어서 🏫🍜도 함께 넣었어요."></textarea>
+      </div>
+    </div>
+  </div>
+
+  <div class="btn-row">
+    <button class="btn btn-ghost" onclick="go('s-rule')">← 돌아가기</button>
+    <button class="btn btn-primary" onclick="submitQuiz()">제출하기 →</button>
+  </div>
+</div>
+
+<!-- 3단계: 성찰 -->
+<div id="s-reflect" class="screen">
+  <div class="steps"><div class="dot ok">✓</div><div class="dot ok">✓</div><div class="dot on">3</div><span style="font-size:13px;color:var(--color-text-secondary)">생각 나누기</span></div>
+  <h2>생각을 나눠봐요</h2>
+  <div class="card">
+    <h3>친구 퀴즈 중 가장 이해하기 쉬웠던 건?</h3>
+    <div style="margin-top:0.75rem"><label>친구 이름</label><input class="name-inp" id="bfriend" placeholder="예) 이수아"/></div>
+    <div style="margin-top:0.75rem"><label>왜 그 친구 퀴즈가 이해하기 쉬웠나요?</label>
+      <div class="emoji-input-wrap">
+        <div class="emoji-insert-bar" id="bar-br"><div class="bar-label">이모지 넣기 →</div></div>
+        <textarea class="emoji-input-area" id="breason" placeholder="예) 이모지가 딱 맞아서 글자 없이도 바로 알 수 있었어요!"></textarea>
+      </div>
+    </div>
+  </div>
+  <div class="card">
+    <h3>오늘 배운 것, 느낀 것</h3>
+    <div style="margin-top:0.625rem"><label>자유롭게 써요</label>
+      <div class="emoji-input-wrap">
+        <div class="emoji-insert-bar" id="bar-rf"><div class="bar-label">이모지 넣기 →</div></div>
+        <textarea class="emoji-input-area" id="reflection" placeholder="예) 나라마다 학교 규칙이 달라서 신기했어요!" style="min-height:100px"></textarea>
+      </div>
+    </div>
+  </div>
+  <div class="btn-row">
+    <button class="btn btn-ghost" onclick="go('s-emoji')">← 돌아가기</button>
+    <button class="btn btn-primary" onclick="submitReflect()">완료 →</button>
+  </div>
+</div>
+
+<!-- 완료 -->
+<div id="s-done" class="screen">
+  <div class="success">잘했어요! 제출 완료 🎉</div>
+  <div class="card">
+    <h3>내가 만든 이모지 퀴즈</h3>
+    <div class="preview-box" id="done-preview" style="margin-top:0.625rem"></div>
+    <div style="font-size:13px;color:var(--color-text-secondary);margin-top:0.625rem" id="done-rule"></div>
+  </div>
+  <div class="info" style="margin-bottom:1rem">선생님이 퀴즈를 골라서 반 친구들과 함께 풀어볼 거예요!</div>
+  <div class="btn-row"><button class="btn" onclick="go('s-mode')">처음으로</button></div>
+</div>
+
+<!-- 선생님 메인 -->
+<div id="s-teacher" class="screen">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem">
+    <div><h2 style="margin-bottom:0.1rem">선생님 화면</h2><p style="font-size:13px;color:var(--color-text-secondary)">퀴즈 하나를 골라 크게 띄우고, 아이들이 손들고 정답을 말해봐요.</p></div>
+    <div style="display:flex;gap:8px">
+      <button class="btn btn-ghost" style="font-size:13px" onclick="loadTeacher()">새로고침</button>
+      <button class="btn" onclick="go('s-mode')" style="font-size:13px">← 나가기</button>
+    </div>
+  </div>
+  <div class="stat-row">
+    <div class="stat"><div class="stat-n" id="t-total">0</div><div class="stat-l">총 제출</div></div>
+    <div class="stat"><div class="stat-n" id="t-ctry">0</div><div class="stat-l">나라 종류</div></div>
+  </div>
+  <div class="info" style="margin-bottom:1rem">목록에서는 정답과 제출자 이름을 숨겼어요. 퀴즈를 하나 선택하면 이모지만 크게 보이고, <strong>정답·제출자·설명 보기</strong> 버튼을 눌렀을 때만 정답 정보가 열립니다.</div>
+  <div class="divider"></div>
+  <h3 style="margin-bottom:0.75rem">제출된 퀴즈</h3>
+  <div id="qlist"></div>
+  <div class="btn-row" style="margin-top:1.25rem"><button class="btn btn-danger" onclick="clearAll()">전체 초기화</button></div>
+</div>
+
+<!-- 선생님 발표 화면 -->
+<div id="s-present" class="screen">
+  <div style="display:flex;align-items:center;gap:10px;margin-bottom:1.25rem">
+    <button class="btn btn-ghost" onclick="go('s-teacher')">← 목록으로</button>
+    <h2 style="margin-bottom:0">함께 퀴즈 풀기</h2>
+  </div>
+  <div class="card" style="text-align:center;margin-bottom:0.875rem">
+    <div class="presentation-emoji" id="p-emoji"></div>
+    <div style="font-size:15px;color:var(--color-text-secondary);line-height:1.7">이 이모지들이 나타내는 학교 규칙은 무엇일까요?<br>정답을 아는 친구는 손을 들고 말해요.</div>
+  </div>
+  <div id="p-answer" style="display:none">
+    <div class="card reveal-card">
+      <div style="font-size:15px;font-weight:600;color:#3B6D11;margin-bottom:0.75rem">정답·제출자·설명 공개</div>
+      <div class="reveal-section">
+        <div class="reveal-label">누가 제출한 퀴즈인가요?</div>
+        <div class="reveal-text" id="p-author"></div>
+      </div>
+      <div class="reveal-section">
+        <div class="reveal-label">정답</div>
+        <div class="reveal-text"><span id="p-ctry"></span><br><span id="p-rule"></span></div>
+      </div>
+      <div class="reveal-section">
+        <div class="reveal-label">질문 1 — 어떤 이모지로 어떤 내용을 표현했나요?</div>
+        <div class="reveal-text" id="p-q1"></div>
+      </div>
+      <div class="reveal-section">
+        <div class="reveal-label">질문 2 — 가장 신경 써서 고른 이모지는 무엇인가요?</div>
+        <div class="reveal-text" id="p-q2"></div>
+      </div>
+      <div class="reveal-section" id="p-q3-wrap">
+        <div class="reveal-label">질문 3 — 헷갈릴 수 있는 부분이나 바꿀 점</div>
+        <div class="reveal-text" id="p-q3"></div>
+      </div>
+    </div>
+  </div>
+  <div class="btn-row" style="margin-top:1rem">
+    <button class="btn btn-primary" id="reveal-btn" onclick="revealAnswer()">정답·제출자·설명 보기</button>
+    <button class="btn btn-ghost" id="hide-answer-btn" style="display:none" onclick="hideAnswer()">다시 이모지만 보기</button>
+  </div>
+</div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-app.js";
+import { getFirestore, collection, addDoc, updateDoc, deleteDoc, doc, getDocs, query, orderBy, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore.js";
+
+// 1) Firebase 콘솔에서 복사한 firebaseConfig 값을 아래에 붙여 넣으세요.
+// 2) 값이 모두 입력되면 학생 제출 내용이 Firestore에 저장되고, 선생님 화면에서 실시간으로 모입니다.
+// 3) 값이 비어 있으면 임시로 localStorage를 사용하므로 같은 기기 안에서만 저장됩니다.
+const firebaseConfig = {
+  apiKey: "AIzaSyAt28Q6pps1hdsKIUrRUJrSVFz86pwnGM4",
+  authDomain: "emoji-quiz-class.firebaseapp.com",
+  projectId: "emoji-quiz-class",
+  storageBucket: "emoji-quiz-class.firebasestorage.app",
+  messagingSenderId: "123310343077",
+  appId: "1:123310343077:web:29020738661a071ac7de4c"
+};
+
+let firebaseApp=null;
+let db=null;
+let submissionsRef=null;
+let teacherUnsubscribe=null;
+let currentSubmissionId=null;
+let teacherSubsCache=[];
+
+const RULES=[
+  {country:"중국",cls:"cn",flag:"🇨🇳",rules:[
+    {id:"cn1",text:"점심을 먹고 나서 학교에서 낮잠을 자요 (2시간!)"},
+    {id:"cn2",text:"쉬는 시간마다 눈을 손가락으로 꾹꾹 눌러요 (눈 마사지 체조!)"},
+    {id:"cn3",text:"교복이 운동복이에요. 매일 체육복 차림으로 학교에 와요"},
+  ]},
+  {country:"우크라이나",cls:"ua",flag:"🇺🇦",rules:[
+    {id:"ua1",text:"개학날(9월 1일) 선생님께 꽃다발을 선물해요"},
+    {id:"ua2",text:"1학년부터 12학년까지 모두 같은 학교 건물을 다녀요"},
+    {id:"ua3",text:"성적표 점수가 최고 12점이에요 (한국은 100점!)"},
+  ]},
+  {country:"몽골",cls:"mn",flag:"🇲🇳",rules:[
+    {id:"mn1",text:"학교 이름이 번호예요. '23번 학교'처럼 숫자로 불러요"},
+    {id:"mn2",text:"방과후에 말타기와 활쏘기 같은 전통 활동을 배워요"},
+    {id:"mn3",text:"오전 반과 오후 반이 같은 교실을 번갈아 써요"},
+  ]},
+  {country:"베트남",cls:"vn",flag:"🇻🇳",rules:[
+    {id:"vn1",text:"교복 목에 빨간 삼각 머플러를 매요"},
+    {id:"vn2",text:"여름방학이 3달이나 돼요!"},
+    {id:"vn3",text:"한 반에 학생이 50명이 넘어요"},
+  ]},
+];
+
+const EMOJI_CATS=[
+  {label:"학교·공부",list:["🏫","📚","✏️","📝","📖","🎒","🏆","📊","🔔","📋"]},
+  {label:"숫자·시간",list:["1️⃣","2️⃣","3️⃣","4️⃣","5️⃣","6️⃣","7️⃣","8️⃣","9️⃣","🔟","1️⃣2️⃣","5️⃣0️⃣","⏰","🕐","📅","🗓️","🌅","🌙","🌞"]},
+  {label:"몸·행동",list:["😴","💤","👀","👁️","💪","🙌","👏","🤲","🏃","🧘","😮","😲","😊","🥱","🤔","😌","👋","🤸","🙏"]},
+  {label:"음식·생활",list:["🍜","🍚","🍱","🥢","🍽️","🛏️","🛌","🏠","🚪","🪑","🎽","👕","🧣","🎀","👔","🌂","🧸"]},
+  {label:"꽃·자연",list:["🌸","🌷","🌹","💐","🌺","🌻","🌿","🍃","❄️","☃️","🌨️","🌈","⭐","🌟","🌙"]},
+  {label:"동물·스포츠",list:["🐎","🐴","🏇","🏹","🎯","🥊","🤼","🏋️","🤺","🎠","🥇","🥈","🥉","🏅"]},
+  {label:"방향·이동",list:["➡️","⬅️","⬆️","⬇️","🔄","🔃","↩️","🔁","🔀","🚌","🚶","🌏","🗺️","📍"]},
+  {label:"기타",list:["❓","💡","⭕","❌","✅","⚠️","💬","🗣️","👥","👨‍👩‍👧","🎉","📢","🔑","🔢","💯","🎊","❤️","🤩","😅"]},
+];
+
+let mode="student",sName="",selRule=null,pickedEmojis=[],presIdx=null;
+let focusedTextareaId=null;
+
+function isFirebaseConfigured(){
+  return Boolean(firebaseConfig.apiKey)
+    && !firebaseConfig.apiKey.includes("YOUR_")
+    && !firebaseConfig.projectId.includes("YOUR_")
+    && !firebaseConfig.appId.includes("YOUR_");
+}
+
+function initFirebaseIfPossible(){
+  if(!isFirebaseConfigured()){
+    console.warn("Firebase 설정값이 아직 입력되지 않아 localStorage로 임시 저장합니다.");
+    return;
+  }
+  try{
+    firebaseApp = initializeApp(firebaseConfig);
+    db = getFirestore(firebaseApp);
+    submissionsRef = collection(db,"emojiQuizSubmissions");
+    console.log("Firebase Firestore 연결 완료");
+  }catch(err){
+    console.error("Firebase 초기화 실패:",err);
+    alert("Firebase 설정값을 확인해 주세요. 현재는 이 기기 안에만 저장됩니다.");
+  }
+}
+
+function usingFirebase(){return Boolean(db && submissionsRef)}
+
+function localLoad(){
+  try{const raw=localStorage.getItem("qsubs");return raw?JSON.parse(raw):[]}catch{return[]}
+}
+function localSave(d){
+  try{localStorage.setItem("qsubs",JSON.stringify(d))}catch{}
+}
+
+async function load(){
+  try{
+    if(usingFirebase()){
+      const snap=await getDocs(query(submissionsRef,orderBy("ts","asc")));
+      return snap.docs.map(docSnap=>({id:docSnap.id,...docSnap.data()}));
+    }
+    return localLoad();
+  }catch(err){
+    console.error("자료 불러오기 실패:",err);
+    return [];
+  }
+}
+
+async function addSubmission(submission){
+  try{
+    if(usingFirebase()){
+      const docRef=await addDoc(submissionsRef,{...submission,createdAt:serverTimestamp()});
+      return docRef.id;
+    }
+    const subs=localLoad();
+    const id=`local-${Date.now()}-${Math.random().toString(36).slice(2,8)}`;
+    subs.push({id,...submission});
+    localSave(subs);
+    return id;
+  }catch(err){
+    console.error("제출 저장 실패:",err);
+    alert("제출 저장에 실패했습니다. 인터넷 연결과 Firebase 규칙을 확인해 주세요.");
+    return null;
+  }
+}
+
+async function updateSubmission(id,updates){
+  try{
+    if(usingFirebase()){
+      await updateDoc(doc(db,"emojiQuizSubmissions",id),updates);
+      return;
+    }
+    const subs=localLoad();
+    const idx=subs.findIndex(s=>s.id===id);
+    if(idx>-1){subs[idx]={...subs[idx],...updates};localSave(subs)}
+  }catch(err){
+    console.error("제출 수정 실패:",err);
+    alert("수정 저장에 실패했습니다. 인터넷 연결과 Firebase 규칙을 확인해 주세요.");
+  }
+}
+
+async function deleteAllSubmissions(){
+  try{
+    if(usingFirebase()){
+      const snap=await getDocs(submissionsRef);
+      await Promise.all(snap.docs.map(docSnap=>deleteDoc(doc(db,"emojiQuizSubmissions",docSnap.id))));
+      return;
+    }
+    localSave([]);
+  }catch(err){
+    console.error("초기화 실패:",err);
+    alert("초기화에 실패했습니다. Firebase 규칙에서 delete 권한을 확인해 주세요.");
+  }
+}
+
+function subscribeTeacherRealtime(){
+  if(!usingFirebase())return false;
+  if(teacherUnsubscribe)teacherUnsubscribe();
+  teacherUnsubscribe=onSnapshot(
+    query(submissionsRef,orderBy("ts","asc")),
+    snap=>{
+      const subs=snap.docs.map(docSnap=>({id:docSnap.id,...docSnap.data()}));
+      renderTeacher(subs);
+    },
+    err=>{
+      console.error("실시간 불러오기 실패:",err);
+      const ql=document.getElementById("qlist");
+      if(ql)ql.innerHTML=`<div class="info">Firebase 자료를 불러오지 못했습니다. Firestore 보안 규칙과 인터넷 연결을 확인해 주세요.</div>`;
+    }
+  );
+  return true;
+}
+
+function save(d){localSave(d)}
+
+function go(id){document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));document.getElementById(id).classList.add("active")}
+
+function setMode(m,el){
+  mode=m;
+  document.querySelectorAll(".mtab").forEach(t=>t.classList.remove("on"));el.classList.add("on");
+  document.getElementById("d-student").style.display=m==="student"?"block":"none";
+  document.getElementById("d-teacher").style.display=m==="teacher"?"block":"none";
+}
+
+function startStudent(){
+  const n=document.getElementById("sname").value.trim();
+  if(!n){alert("이름을 입력해 주세요!");return}
+  sName=n;buildRules();go("s-rule");
+}
+
+function buildRules(){
+  const g=document.getElementById("rule-grid");g.innerHTML="";
+  RULES.forEach(c=>c.rules.forEach(rule=>{
+    const d=document.createElement("div");d.className="rule-card";d.dataset.id=rule.id;
+    d.innerHTML=`<div class="ctry"><span class="badge ${c.cls}">${c.flag} ${c.country}</span></div><div class="rtxt">${rule.text}</div>`;
+    d.onclick=()=>{document.querySelectorAll(".rule-card").forEach(x=>x.classList.remove("selected"));d.classList.add("selected");selRule={id:rule.id,country:c.country,flag:c.flag,cls:c.cls,text:rule.text}};
+    g.appendChild(d);
+  }));
+}
+
+function toEmoji(){
+  if(!selRule){alert("규칙을 하나 골라 주세요!");return}
+  document.getElementById("sel-badge").innerHTML=`<span class="badge ${selRule.cls}">${selRule.flag} ${selRule.country}</span>`;
+  document.getElementById("sel-text").textContent=selRule.text;
+  buildPicker();setupTextareaFocus();go("s-emoji");
+}
+
+function buildPicker(){
+  const g=document.getElementById("epicker");g.innerHTML="";
+  pickedEmojis=[];updatePreview();
+  EMOJI_CATS.forEach(cat=>{
+    const lbl=document.createElement("div");lbl.className="emoji-section-label";lbl.textContent=cat.label;g.appendChild(lbl);
+    const row=document.createElement("div");row.className="emoji-pool";
+    cat.list.forEach(e=>{
+      const b=document.createElement("button");b.className="ebtn";b.textContent=e;
+      b.onclick=()=>toggleEmoji(e,b);
+      row.appendChild(b);
+    });
+    g.appendChild(row);
+  });
+}
+
+function setupTextareaFocus(){
+  ["q1","q2","q3","breason","reflection"].forEach(id=>{
+    const el=document.getElementById(id);
+    if(!el)return;
+    el.addEventListener("focus",()=>{focusedTextareaId=id;});
+    el.addEventListener("blur",e=>{
+      if(e.relatedTarget&&(e.relatedTarget.classList.contains("ins-btn")||e.relatedTarget.classList.contains("backspace-btn")))return;
+      setTimeout(()=>{if(focusedTextareaId===id)focusedTextareaId=null;},200);
+    });
+  });
+}
+
+function toggleEmoji(e,btn){
+  const idx=pickedEmojis.lastIndexOf(e);
+  if(btn.classList.contains("picked")){pickedEmojis.splice(idx,1);btn.classList.remove("picked")}
+  else{pickedEmojis.push(e);btn.classList.add("picked")}
+  updatePreview();
+  updateInsertBars();
+}
+
+function removeLastEmoji(){
+  if(!pickedEmojis.length)return;
+  const last=pickedEmojis.pop();
+  const btns=document.querySelectorAll(".ebtn");
+  for(let i=btns.length-1;i>=0;i--){if(btns[i].textContent===last&&btns[i].classList.contains("picked")){btns[i].classList.remove("picked");break}}
+  updatePreview();updateInsertBars();
+}
+
+function clearEmojis(){
+  pickedEmojis=[];
+  document.querySelectorAll(".ebtn").forEach(b=>b.classList.remove("picked"));
+  updatePreview();updateInsertBars();
+}
+
+function updatePreview(){
+  const p=document.getElementById("preview");
+  const cnt=document.getElementById("emoji-count");
+  if(!pickedEmojis.length){p.innerHTML=`<span class="preview-empty">이모지를 누르면 여기에 나타나요</span>`}
+  else{p.textContent=pickedEmojis.join(" ")}
+  if(cnt)cnt.textContent=`${pickedEmojis.length}개 선택`;
+}
+
+// 이모지 삽입 바 업데이트 (고른 이모지만 표시)
+function updateInsertBars(){
+  const barIds=["bar-q1","bar-q2","bar-q3","bar-br","bar-rf"];
+  const taIds=["q1","q2","q3","breason","reflection"];
+  const unique=[...new Set(pickedEmojis)];
+
+  barIds.forEach((barId,i)=>{
+    const bar=document.getElementById(barId);
+    if(!bar)return;
+    bar.innerHTML=`<div class="bar-label">${unique.length>0?"누르면 글 안에 이모지가 들어가요 →":"이모지를 먼저 골라야 여기에 나타나요"}</div>`;
+    unique.forEach(e=>{
+      const btn=document.createElement("button");
+      btn.className="ins-btn";btn.textContent=e;btn.tabIndex=-1;
+      btn.onmousedown=(ev)=>{ev.preventDefault();insertEmojiIntoTextarea(taIds[i],e);};
+      bar.appendChild(btn);
+    });
+    if(unique.length>0){
+      const del=document.createElement("button");
+      del.className="backspace-btn";del.textContent="← 한 글자 지우기";del.tabIndex=-1;
+      del.onmousedown=(ev)=>{ev.preventDefault();deleteLastCharFromTextarea(taIds[i]);};
+      bar.appendChild(del);
+      const clear=document.createElement("button");
+      clear.className="backspace-btn";clear.textContent="입력창 비우기";clear.tabIndex=-1;
+      clear.onmousedown=(ev)=>{ev.preventDefault();clearTextarea(taIds[i]);};
+      bar.appendChild(clear);
+    }
+  });
+}
+
+function clearTextarea(id){
+  const ta=document.getElementById(id);if(!ta)return;
+  ta.value="";
+  ta.focus();focusedTextareaId=id;
+}
+
+function insertEmojiIntoTextarea(id,emoji){
+  const ta=document.getElementById(id);if(!ta)return;
+  const s=ta.selectionStart,e2=ta.selectionEnd;
+  ta.value=ta.value.slice(0,s)+emoji+ta.value.slice(e2);
+  ta.selectionStart=ta.selectionEnd=s+emoji.length;
+  ta.focus();focusedTextareaId=id;
+}
+
+function deleteLastCharFromTextarea(id){
+  const ta=document.getElementById(id);if(!ta)return;
+  const s=ta.selectionStart;
+  if(s===0&&ta.selectionEnd===0)return;
+  if(ta.selectionStart!==ta.selectionEnd){
+    ta.value=ta.value.slice(0,ta.selectionStart)+ta.value.slice(ta.selectionEnd);
+    ta.selectionStart=ta.selectionEnd=ta.selectionStart;
+  } else if(s>0){
+    const txt=ta.value;
+    let del=1;
+    if(s>=2){const cp=txt.codePointAt(s-2);if(cp>0xFFFF)del=2;}
+    ta.value=txt.slice(0,s-del)+txt.slice(s);
+    ta.selectionStart=ta.selectionEnd=s-del;
+  }
+  ta.focus();focusedTextareaId=id;
+}
+
+async function submitQuiz(){
+  if(pickedEmojis.length<2){alert("이모지를 2개 이상 골라 주세요!");return}
+  const q1=document.getElementById("q1").value.trim();
+  const q2=document.getElementById("q2").value.trim();
+  if(!q1){alert("질문 1에 대답해 주세요!
+(어떤 이모지로 어떤 내용을 나타냈는지 써요)");return}
+  if(!q2){alert("질문 2에 대답해 주세요!
+(가장 신경 써서 고른 이모지를 설명해 줘요)");return}
+  const q3=document.getElementById("q3").value.trim();
+  const submission={name:sName,rule:selRule,emojis:pickedEmojis.join(" "),q1,q2,q3,bFriend:"",bReason:"",reflection:"",ts:Date.now()};
+  const savedId=await addSubmission(submission);
+  if(!savedId)return;
+  currentSubmissionId=savedId;
+  setupReflectBars();
+  go("s-reflect");
+}
+
+function setupReflectBars(){
+  setupTextareaFocus();
+  updateInsertBars();
+}
+
+async function submitReflect(){
+  const refl=document.getElementById("reflection").value.trim();
+  if(!refl){alert("오늘 느낀 점을 써 주세요!");return}
+  const updates={
+    bFriend:document.getElementById("bfriend").value.trim(),
+    bReason:document.getElementById("breason").value.trim(),
+    reflection:refl,
+    reflectedAt:Date.now()
+  };
+  if(currentSubmissionId){
+    await updateSubmission(currentSubmissionId,updates);
+  }else{
+    const subs=await load();
+    const mine=[...subs].reverse().find(s=>s.name===sName);
+    if(mine&&mine.id)await updateSubmission(mine.id,updates);
+  }
+  document.getElementById("done-preview").textContent=pickedEmojis.join(" ");
+  document.getElementById("done-rule").textContent=`${selRule.flag} ${selRule.country} — ${selRule.text}`;
+  go("s-done");
+}
+
+async function startTeacher(){
+  go("s-teacher");
+  const realtime=subscribeTeacherRealtime();
+  if(!realtime)await loadTeacher();
+}
+
+async function loadTeacher(){
+  const subs=await load();
+  renderTeacher(subs);
+}
+
+function renderTeacher(subs){
+  teacherSubsCache=subs||[];
+  document.getElementById("t-total").textContent=teacherSubsCache.length;
+  const ctries=new Set(teacherSubsCache.map(s=>s.rule?.country).filter(Boolean));
+  document.getElementById("t-ctry").textContent=ctries.size;
+  const ql=document.getElementById("qlist");ql.innerHTML="";
+  if(!teacherSubsCache.length){ql.innerHTML=`<div class="info">아직 제출된 퀴즈가 없어요.</div>`;return}
+  teacherSubsCache.forEach((s,i)=>{
+    const d=document.createElement("div");d.className="qitem"+(presIdx===i?" presenting":"");
+    d.innerHTML=`<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.5rem"><span style="font-weight:500;font-size:14px">퀴즈 ${i+1}</span><span class="rtag">정답 숨김</span></div><div class="quiz-list-emoji">${s.emojis}</div><div style="font-size:12px;color:var(--color-text-secondary);line-height:1.5">선택하면 발표 화면으로 크게 보여줍니다.</div>`;
+    d.onclick=()=>presentQuiz(i,s);ql.appendChild(d);
+  });
+}
+
+function presentQuiz(i,s){
+  presIdx=i;
+  document.getElementById("p-emoji").textContent=s.emojis;
+  document.getElementById("p-author").textContent=`${s.name}의 퀴즈`;
+  document.getElementById("p-ctry").textContent=`${s.rule.flag} ${s.rule.country}`;
+  document.getElementById("p-rule").textContent=s.rule.text;
+  document.getElementById("p-q1").textContent=s.q1||"(입력 내용 없음)";
+  document.getElementById("p-q2").textContent=s.q2||"(입력 내용 없음)";
+  document.getElementById("p-q3").textContent=s.q3||"(입력 내용 없음)";
+  document.getElementById("p-answer").style.display="none";
+  document.getElementById("reveal-btn").style.display="inline-block";
+  document.getElementById("hide-answer-btn").style.display="none";
+  go("s-present");
+}
+
+function revealAnswer(){
+  document.getElementById("p-answer").style.display="block";
+  document.getElementById("reveal-btn").style.display="none";
+  document.getElementById("hide-answer-btn").style.display="inline-block";
+}
+
+function hideAnswer(){
+  document.getElementById("p-answer").style.display="none";
+  document.getElementById("reveal-btn").style.display="inline-block";
+  document.getElementById("hide-answer-btn").style.display="none";
+}
+
+async function clearAll(){
+  if(!confirm("모든 데이터를 지울까요?"))return;
+  await deleteAllSubmissions();
+  presIdx=null;
+  await loadTeacher();
+}
+
+initFirebaseIfPossible();
+
+Object.assign(window,{
+  go,setMode,startStudent,toEmoji,removeLastEmoji,clearEmojis,submitQuiz,submitReflect,
+  startTeacher,loadTeacher,presentQuiz,revealAnswer,hideAnswer,clearAll
+});
+</script>
