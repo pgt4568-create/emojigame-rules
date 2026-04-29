@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>이모지 퀴즈 만들기</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','Noto Sans KR',sans-serif;font-size:15px;color:#1a1a1a;background:#f5f5f5;min-height:100vh}
+.app{max-width:720px;margin:0 auto;padding:1.5rem 1rem;min-height:100vh}
+.screen{display:none}.screen.active{display:block}
+.card{background:#fff;border:1px solid #e8e8e8;border-radius:12px;padding:1.25rem;margin-bottom:0.875rem}
+h1{font-size:22px;font-weight:600;margin-bottom:0.25rem}
+h2{font-size:18px;font-weight:600;margin-bottom:0.875rem}
+h3{font-size:16px;font-weight:600;margin-bottom:0.5rem}
+.badge{display:inline-flex;align-items:center;gap:4px;font-size:12px;padding:3px 10px;border-radius:20px;font-weight:500}
+.cn{background:#fff0f0;color:#a00}.ua{background:#e8f0ff;color:#005BBB}.mn{background:#fff0f0;color:#8B0000}.vn{background:#fff5f0;color:#c01}
+.rule-grid{display:grid;grid-template-columns:1fr 1fr;gap:0.625rem;margin-bottom:1rem}
+.rule-card{border:1.5px solid #e0e0e0;border-radius:8px;padding:0.875rem;cursor:pointer;transition:all 0.12s;user-select:none;background:#fff}
+.rule-card:hover{border-color:#aaa;background:#fafafa}
+.rule-card.selected{border:2px solid #378ADD;background:#e6f1fb30}
+.rule-card .ctry{font-size:12px;margin-bottom:0.375rem}
+.rule-card .rtxt{font-size:14px;font-weight:500;line-height:1.5}
+.emoji-pool{display:flex;flex-wrap:wrap;gap:7px;margin:0.5rem 0}
+/* 이모지 버튼 — 클릭할 때마다 추가 (picked는 단순 하이라이트용) */
+.ebtn{font-size:22px;padding:6px 10px;border:1.5px solid #e0e0e0;border-radius:8px;cursor:pointer;background:#fff;transition:all 0.1s;user-select:none;line-height:1}
+.ebtn:hover{border-color:#aaa;background:#f5f5f5}
+.ebtn.used{border-color:#378ADD;background:#deeeff40}
+.btn{padding:9px 20px;border-radius:8px;border:1px solid #ccc;background:#fff;font-size:14px;cursor:pointer;font-family:inherit;color:#1a1a1a;transition:background 0.1s}
+.btn:hover{background:#f0f0f0}
+.btn-primary{background:#378ADD;color:#fff;border-color:#378ADD;font-weight:500}
+.btn-primary:hover{background:#185FA5}
+.btn-success{background:#639922;color:#fff;border-color:#639922;font-weight:500}
+.btn-danger{background:#E24B4A;color:#fff;border-color:#E24B4A}
+.btn-danger:hover{background:#A32D2D}
+.btn-ghost{background:transparent;border-color:#ddd;color:#666}
+.btn-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:1rem;align-items:center}
+.steps{display:flex;gap:6px;align-items:center;margin-bottom:1.25rem}
+.dot{width:28px;height:28px;border-radius:50%;border:1px solid #ddd;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:500;color:#888;flex-shrink:0}
+.dot.on{background:#378ADD;color:#fff;border-color:#378ADD}
+.dot.ok{background:#639922;color:#fff;border-color:#639922}
+.divider{height:1px;background:#f0f0f0;margin:1rem 0}
+.name-inp{width:100%;padding:9px 12px;border:1px solid #ddd;border-radius:8px;font-size:14px;font-family:inherit;color:#1a1a1a;background:#fff}
+.name-inp:focus{outline:none;border-color:#378ADD}
+label{font-size:13px;color:#666;display:block;margin-bottom:5px}
+.info-box{background:#f8f8f8;border-radius:8px;padding:0.875rem 1rem;font-size:14px;line-height:1.7;color:#666}
+.mode-tabs{display:flex;border:1px solid #e0e0e0;border-radius:8px;overflow:hidden;margin-bottom:1.25rem}
+.mtab{flex:1;padding:10px;text-align:center;font-size:14px;cursor:pointer;border:none;background:#fff;color:#888;font-family:inherit}
+.mtab.on{background:#f0f0f0;color:#1a1a1a;font-weight:500}
+.mtab:not(:last-child){border-right:1px solid #e0e0e0}
+.success-banner{background:#eaf3de;border-radius:8px;padding:1rem 1.25rem;color:#3B6D11;font-weight:500;font-size:15px;text-align:center;margin-bottom:1rem}
+.qitem{border:1px solid #e0e0e0;border-radius:8px;padding:1rem;margin-bottom:0.625rem;cursor:pointer;background:#fff;transition:all 0.15s;position:relative;overflow:hidden}
+.qitem:hover{border-color:#378ADD;background:#f8fbff}
+.qitem-hint{position:absolute;right:12px;top:50%;transform:translateY(-50%);font-size:11px;color:#378ADD;font-weight:500;opacity:0;transition:opacity 0.15s}
+.qitem:hover .qitem-hint{opacity:1}
+.rtag{font-size:11px;padding:2px 8px;border-radius:12px;border:1px solid #e0e0e0;color:#888}
+.ex-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:0.375rem 0}
+.ex-word{font-size:13px;padding:3px 10px;background:#f5f5f5;border-radius:16px;border:1px solid #e0e0e0}
+.ex-arr{color:#888;font-size:14px}
+.clear-btn{font-size:13px;padding:5px 12px;border-radius:8px;border:1px solid #ccc;background:#fff;cursor:pointer;color:#666;font-family:inherit}
+.clear-btn:hover{background:#fff0f0;border-color:#E24B4A;color:#A32D2D}
+.emoji-section-label{font-size:12px;font-weight:500;color:#888;padding:6px 0 4px;margin-top:4px;border-top:1px solid #f0f0f0}
+.emoji-section-label:first-child{border-top:none;margin-top:0;padding-top:0}
+.intent-q{background:#f8f8f8;border-radius:8px;padding:1rem 1.125rem;margin-bottom:0.75rem}
+.intent-q .qnum{font-size:12px;font-weight:500;color:#378ADD;margin-bottom:0.375rem}
+.intent-q .qtxt{font-size:14px;font-weight:500;margin-bottom:0.75rem;line-height:1.6}
+.required-mark{color:#E24B4A;font-size:12px;margin-left:4px}
+.emoji-input-area{width:100%;padding:10px 12px;border:1px solid #ddd;border-radius:8px;font-size:15px;font-family:inherit;color:#1a1a1a;background:#fff;line-height:1.7;min-height:72px;resize:vertical}
+.emoji-input-area:focus{outline:none;border-color:#378ADD}
+.emoji-insert-bar{display:flex;flex-wrap:wrap;gap:5px;padding:6px 8px;background:#f5f5f5;border:1px solid #ddd;border-top:none;border-radius:0 0 8px 8px;margin-top:-3px}
+.emoji-insert-bar .bar-label{font-size:11px;color:#888;width:100%;padding:2px 0;margin-bottom:2px}
+.ins-btn{font-size:18px;padding:4px 7px;border:1.5px solid #ddd;border-radius:6px;cursor:pointer;background:#fff;transition:all 0.1s;line-height:1;user-select:none}
+.ins-btn:hover{border-color:#378ADD;background:#e6f1fb30}
+.ins-btn:active{transform:scale(0.92)}
+.backspace-btn{font-size:13px;padding:4px 10px;border:1.5px solid #ddd;border-radius:6px;cursor:pointer;background:#fff;color:#666;font-family:inherit;line-height:1.4}
+.backspace-btn:hover{border-color:#E24B4A;color:#A32D2D;background:#fff0f0}
+/* 이모지 화면 — 하단바 여백 + sticky 규칙 카드 */
+.emoji-screen-wrap{padding-bottom:90px}
+.sticky-rule-card{position:sticky;top:0;z-index:100;background:#fff;border:2px solid #378ADD;border-radius:10px;padding:0.75rem 1rem;margin-bottom:0.875rem;box-shadow:0 2px 8px rgba(55,138,221,0.12)}
+.bottom-bar{position:sticky;bottom:0;z-index:200;background:#fff;border:1px solid #ccc;border-radius:12px 12px 0 0;padding:10px 14px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:1rem;border-top:2px solid #ccc;box-shadow:0 -2px 12px rgba(0,0,0,0.08)}
+.bar-emoji{flex:1;font-size:24px;letter-spacing:5px;word-break:break-all;line-height:1.6;min-height:34px;display:flex;align-items:center}
+.bar-empty{font-size:13px;color:#aaa;letter-spacing:0}
+.bar-right{display:flex;gap:6px;align-items:center;flex-shrink:0;flex-wrap:wrap}
+.cnt-chip{font-size:12px;font-weight:500;color:#666;background:#f5f5f5;border:1px solid #e0e0e0;border-radius:12px;padding:3px 10px;white-space:nowrap}
+.notice{background:#e6f1fb;border:1px solid #B5D4F4;border-radius:8px;padding:0.75rem 1rem;font-size:13px;color:#0C447C;line-height:1.6;margin-bottom:1rem}
+.notice strong{color:#042C53}
+.loading-msg{text-align:center;padding:2rem;color:#888;font-size:14px}
+.my-quiz-item{background:#f8f8f8;border-radius:8px;padding:0.75rem 1rem;margin-bottom:0.5rem;border:1px solid #e8e8e8}
+.my-quiz-emoji{font-size:24px;letter-spacing:4px;margin:0.375rem 0}
+/* 선생님 생각나눠봐요 */
+.reflect-item{border:1px solid #e8e8e8;border-radius:8px;padding:1rem;margin-bottom:0.625rem;background:#fff}
+.reflect-field{font-size:13px;color:#888;margin-bottom:0.25rem;font-weight:500}
+.reflect-val{font-size:14px;color:#1a1a1a;line-height:1.6}
+/* 모달 */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.65);z-index:1000;align-items:flex-start;justify-content:center;padding:1rem;overflow-y:auto}
+.modal-overlay.show{display:flex}
+.modal-box{background:#fff;border-radius:16px;padding:2rem;max-width:600px;width:100%;margin:auto;position:relative}
+.modal-emoji-big{font-size:48px;letter-spacing:10px;text-align:center;padding:1.5rem 0.5rem;line-height:1.7;word-break:break-all;background:#f8f8f8;border-radius:12px;margin:1rem 0}
+.modal-rule-text{font-size:20px;font-weight:600;line-height:1.5;margin-bottom:0.5rem}
+.modal-explain-text{font-size:16px;line-height:1.8;color:#333}
+.modal-field-label{font-size:13px;font-weight:600;color:#378ADD;margin-bottom:0.375rem;margin-top:1rem}
+/* 로딩 */
+#fb-loading{display:none;position:fixed;inset:0;background:rgba(255,255,255,0.85);z-index:9999;align-items:center;justify-content:center;flex-direction:column;gap:12px}
+#fb-loading.show{display:flex}
+.spinner{width:36px;height:36px;border:3px solid #e0e0e0;border-top-color:#378ADD;border-radius:50%;animation:spin 0.8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+/* 탭 (선생님 화면) */
+.teacher-tabs{display:flex;border:1px solid #e0e0e0;border-radius:8px;overflow:hidden;margin-bottom:1rem}
+.ttab{flex:1;padding:9px;text-align:center;font-size:13px;cursor:pointer;border:none;background:#fff;color:#888;font-family:inherit}
+.ttab.on{background:#f0f0f0;color:#1a1a1a;font-weight:500}
+.ttab:not(:last-child){border-right:1px solid #e0e0e0}
+</style>
+</head>
+<body>
+<div id="fb-loading"><div class="spinner"></div><div style="font-size:14px;color:#666">연결 중...</div></div>
+
+<!-- 교사용 크게 보기 모달 -->
+<div class="modal-overlay" id="quiz-modal" onclick="handleModalClick(event)">
+  <div class="modal-box">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.5rem">
+      <div id="modal-badge-wrap"></div>
+      <button class="btn btn-ghost" style="font-size:13px;padding:6px 14px" onclick="closeModal()">✕ 닫기</button>
+    </div>
+    <div class="modal-emoji-big" id="modal-emoji-display"></div>
+    <p style="text-align:center;font-size:14px;color:#888;margin-bottom:1rem">이 이모지들이 나타내는 학교 규칙은 무엇일까요?</p>
+    <button class="btn btn-success" id="modal-reveal-btn" style="width:100%;padding:13px;font-size:16px" onclick="revealModalAnswer()">정답 공개하기 🎉</button>
+    <div id="modal-answer-section" style="display:none">
+      <div class="divider"></div>
+      <div style="background:#eaf3de;border-radius:8px;padding:1rem 1.25rem;margin-bottom:1rem">
+        <div style="font-size:14px;font-weight:600;color:#3B6D11;margin-bottom:0.5rem">✅ 정답!</div>
+        <div class="modal-rule-text" id="modal-rule-text"></div>
+      </div>
+      <div class="modal-field-label">📝 이모지 설명 (출제자 작성)</div>
+      <div class="modal-explain-text" id="modal-q1-text"></div>
+      <div class="modal-field-label">⭐ 가장 신경 쓴 이모지</div>
+      <div class="modal-explain-text" id="modal-q2-text"></div>
+    </div>
+  </div>
+</div>
+
+<div class="app">
+
+<!-- 시작 -->
+<div id="s-mode" class="screen active">
+  <h1 style="margin-bottom:0.25rem">이모지 퀴즈 만들기</h1>
+  <p style="font-size:13px;color:#888;margin-bottom:1.25rem">세계 여러 나라 학교 규칙을 이모지로 표현해요</p>
+  <div class="notice"><strong>📡 실시간 공유 모드</strong><br>학생이 제출하면 <strong>선생님 화면에 바로 반영</strong>돼요.</div>
+  <div class="mode-tabs">
+    <button class="mtab on" onclick="setMode('student',this)">학생</button>
+    <button class="mtab" onclick="setMode('teacher',this)">선생님</button>
+  </div>
+  <div id="d-student" class="card">
+    <h3>내 이름을 써요</h3>
+    <div style="margin-top:0.75rem"><label>이름</label><input class="name-inp" id="sname" placeholder="예) 김민준"/></div>
+    <div class="btn-row"><button class="btn btn-primary" onclick="startStudent()">시작하기 →</button></div>
+  </div>
+  <div id="d-teacher" class="card" style="display:none">
+    <h3>선생님 화면</h3>
+    <p style="font-size:14px;color:#888;margin:0.5rem 0 1rem;line-height:1.6">퀴즈 카드를 클릭하면 크게 볼 수 있어요.</p>
+    <div class="btn-row"><button class="btn btn-primary" onclick="startTeacher()">선생님 화면 열기 →</button></div>
+  </div>
+</div>
+
+<!-- 1단계 -->
+<div id="s-rule" class="screen">
+  <div class="steps"><div class="dot on">1</div><div class="dot">2</div><div class="dot">3</div><span style="font-size:13px;color:#888">규칙 고르기</span></div>
+  <h2>어떤 나라 규칙을 소개하고 싶나요?</h2>
+  <div class="card" style="border-left:3px solid #378ADD;border-radius:0 12px 12px 0;margin-bottom:1.25rem">
+    <h3 style="color:#185FA5">이모지 퀴즈가 뭔가요?</h3>
+    <p style="font-size:14px;color:#666;margin:0.375rem 0 1rem;line-height:1.7">학교 규칙을 <strong>이모지(그림 문자)만</strong> 사용해서 표현하고, 친구들이 맞히는 퀴즈예요.<br><strong style="color:#E24B4A">글자는 쓸 수 없어요!</strong> 이모지만으로 누구나 이해할 수 있게 만드는 게 핵심이에요.</p>
+    <div style="background:#f8f8f8;border-radius:8px;padding:1rem">
+      <div style="font-size:13px;font-weight:500;margin-bottom:0.5rem">예시 — 중국: 밥 먹고 학교에서 낮잠 (2시간)</div>
+      <div class="ex-row"><span class="ex-word">학교</span><span class="ex-arr">→</span><span style="font-size:20px">🏫</span></div>
+      <div class="ex-row"><span class="ex-word">밥 먹기</span><span class="ex-arr">→</span><span style="font-size:20px">🍜</span></div>
+      <div class="ex-row"><span class="ex-word">낮잠</span><span class="ex-arr">→</span><span style="font-size:20px">😴</span></div>
+      <div class="ex-row"><span class="ex-word">2시간</span><span class="ex-arr">→</span><span style="font-size:20px">2️⃣⏰</span></div>
+      <div class="divider"></div>
+      <div style="font-size:26px;letter-spacing:5px;margin-top:0.25rem">🏫 🍜 😴 2️⃣⏰</div>
+    </div>
+  </div>
+  <p style="font-size:14px;font-weight:500;margin-bottom:0.75rem">규칙을 하나 골라요!</p>
+  <div class="rule-grid" id="rule-grid"></div>
+  <div class="btn-row">
+    <button class="btn btn-ghost" onclick="go('s-mode')">← 돌아가기</button>
+    <button class="btn btn-primary" onclick="toEmoji()">다음 →</button>
+  </div>
+</div>
+
+<!-- 2단계 -->
+<div id="s-emoji" class="screen">
+  <div class="emoji-screen-wrap">
+    <div class="steps"><div class="dot ok">✓</div><div class="dot on">2</div><div class="dot">3</div><span style="font-size:13px;color:#888">이모지 퀴즈 만들기</span></div>
+    <h2>이모지로 규칙을 표현해요</h2>
+
+    <!-- sticky 규칙 카드 -->
+    <div class="sticky-rule-card" id="sticky-rule-card">
+      <div style="font-size:11px;color:#378ADD;font-weight:600;margin-bottom:0.25rem">📌 내가 고른 규칙</div>
+      <div id="sticky-badge"></div>
+      <div id="sticky-text" style="font-size:14px;font-weight:500;margin-top:0.25rem;line-height:1.5;color:#1a1a1a"></div>
+    </div>
+
+    <div class="card">
+      <h3 style="margin-bottom:0.375rem">이모지를 골라요</h3>
+      <p style="font-size:13px;color:#888;margin-bottom:0.75rem;line-height:1.6">누르면 선택돼요. <strong style="color:#378ADD">같은 이모지를 여러 번 눌러도 돼요!</strong> 아래 미리보기 바가 따라와요.</p>
+      <div id="epicker"></div>
+    </div>
+
+    <div class="card">
+      <h3>내 퀴즈를 설명해요</h3>
+      <p style="font-size:13px;color:#888;margin:0.25rem 0 1rem;line-height:1.6">아래 질문에 답하면 제출할 수 있어요!<br><strong style="color:#378ADD">입력창 아래 이모지 버튼을 눌러 글 안에 넣을 수 있어요.</strong></p>
+      <div class="intent-q">
+        <div class="qnum">질문 1 <span class="required-mark">*필수</span></div>
+        <div class="qtxt">내가 고른 이모지들이 규칙의 어떤 부분을 나타내는지 설명해 보세요.</div>
+        <textarea class="emoji-input-area" id="q1" placeholder="예) 🏫는 학교, 🍜는 밥 먹기, 😴는 낮잠, 2️⃣⏰는 2시간을 나타냈어요."></textarea>
+        <div class="emoji-insert-bar" id="bar-q1"><div class="bar-label">이모지를 눌러서 넣어요 →</div></div>
+      </div>
+      <div class="intent-q">
+        <div class="qnum">질문 2 <span class="required-mark">*필수</span></div>
+        <div class="qtxt">가장 신경 써서 고른 이모지는 무엇이고, 왜 그 이모지를 골랐나요?</div>
+        <textarea class="emoji-input-area" id="q2" placeholder="예) 2️⃣⏰를 가장 고민했어요. 숫자와 시계를 함께 써서 '2시간'을 나타냈어요."></textarea>
+        <div class="emoji-insert-bar" id="bar-q2"><div class="bar-label">이모지를 눌러서 넣어요 →</div></div>
+      </div>
+      <div class="intent-q" style="margin-bottom:0">
+        <div class="qnum">질문 3</div>
+        <div class="qtxt">친구들이 내 퀴즈를 바로 이해할 수 있을까요?</div>
+        <textarea class="emoji-input-area" id="q3" placeholder="예) 😴가 '피곤하다'로 보일 수 있어서 💤도 함께 넣었어요."></textarea>
+        <div class="emoji-insert-bar" id="bar-q3"><div class="bar-label">이모지를 눌러서 넣어요 →</div></div>
+      </div>
+    </div>
+    <div class="btn-row" style="margin-bottom:1rem">
+      <button class="btn btn-ghost" onclick="go('s-rule')">← 돌아가기</button>
+      <button class="btn btn-primary" onclick="submitOneQuiz()">이 퀴즈 제출하기 →</button>
+    </div>
+  </div>
+  <div class="bottom-bar">
+    <div class="bar-emoji" id="bar-emoji-txt"><span class="bar-empty">이모지를 고르면 여기에 따라와요</span></div>
+    <div class="bar-right">
+      <span class="cnt-chip" id="bar-cnt">0개 선택</span>
+      <button class="clear-btn" onclick="removeLastEmoji()" style="padding:5px 10px;font-size:12px">마지막 지우기</button>
+      <button class="clear-btn" onclick="clearEmojis()" style="padding:5px 10px;font-size:12px">전체 지우기</button>
+    </div>
+  </div>
+</div>
+
+<!-- 완료 화면 -->
+<div id="s-done" class="screen">
+  <div class="success-banner">퀴즈 제출 완료! 🎉</div>
+  <div class="card">
+    <h3 style="margin-bottom:0.75rem">내가 만든 퀴즈 목록</h3>
+    <div id="my-quizzes-list"><div class="loading-msg" style="padding:0.5rem">불러오는 중...</div></div>
+    <div class="btn-row" style="margin-top:0.875rem">
+      <button class="btn btn-primary" onclick="goMakeMore()">+ 퀴즈 하나 더 만들기</button>
+    </div>
+  </div>
+  <div class="card">
+    <h3 style="margin-bottom:0.75rem">생각을 나눠봐요</h3>
+    <label>가장 이해하기 쉬웠던 친구 이름</label>
+    <input class="name-inp" id="bfriend" placeholder="예) 이수아" style="margin-bottom:0.875rem"/>
+    <label>왜 그 친구 퀴즈가 이해하기 쉬웠나요?</label>
+    <textarea class="emoji-input-area" id="breason" placeholder="예) 🏫🍜처럼 이모지가 딱 맞아서 바로 알 수 있었어요!" style="margin-bottom:0.875rem"></textarea>
+    <label>오늘 배운 것, 느낀 것</label>
+    <textarea class="emoji-input-area" id="reflection" placeholder="예) 나라마다 학교 규칙이 달라서 신기했어요! 🌍" style="min-height:100px"></textarea>
+    <div class="btn-row">
+      <button class="btn btn-primary" onclick="saveFinalReflect()">최종 완료 ✓</button>
+    </div>
+  </div>
+</div>
+
+<!-- 선생님 -->
+<div id="s-teacher" class="screen">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.75rem">
+    <div><h2 style="margin-bottom:0.1rem">선생님 화면</h2><p style="font-size:13px;color:#888">퀴즈 카드 클릭 → 크게 보기</p></div>
+    <div style="display:flex;gap:8px">
+      <button class="btn btn-ghost" style="font-size:13px" onclick="loadTeacher()">새로고침</button>
+      <button class="btn btn-ghost" onclick="go('s-mode')" style="font-size:13px">← 나가기</button>
+    </div>
+  </div>
+  <div class="notice" style="margin-bottom:1rem"><strong>📡 Firebase 연결됨</strong> — 학생 제출 후 새로고침 시 반영. 퀴즈 카드 클릭 → 크게 보기!</div>
+
+  <!-- 탭: 퀴즈 / 생각나눠봐요 -->
+  <div class="teacher-tabs">
+    <button class="ttab on" id="ttab-quiz" onclick="switchTeacherTab('quiz',this)">퀴즈 목록</button>
+    <button class="ttab" id="ttab-reflect" onclick="switchTeacherTab('reflect',this)">생각 나눠봐요</button>
+  </div>
+
+  <div id="teacher-quiz-panel">
+    <div class="stat-row" style="margin-bottom:0">
+      <div style="background:#f8f8f8;border-radius:8px;padding:0.875rem;text-align:center"><div style="font-size:24px;font-weight:600;margin-bottom:2px" id="t-total">0</div><div style="font-size:12px;color:#888">총 제출</div></div>
+      <div style="background:#f8f8f8;border-radius:8px;padding:0.875rem;text-align:center"><div style="font-size:24px;font-weight:600;margin-bottom:2px" id="t-ctry">0</div><div style="font-size:12px;color:#888">나라 종류</div></div>
+      <div style="background:#f8f8f8;border-radius:8px;padding:0.875rem;text-align:center"><div style="font-size:15px;font-weight:600;margin-bottom:2px" id="t-top">—</div><div style="font-size:12px;color:#888">인기 퀴즈</div></div>
+    </div>
+    <div class="divider"></div>
+    <h3 style="margin-bottom:0.75rem">제출된 퀴즈 <span style="font-size:12px;color:#888;font-weight:400">(클릭 → 크게 보기)</span></h3>
+    <div id="qlist"></div>
+  </div>
+
+  <div id="teacher-reflect-panel" style="display:none">
+    <h3 style="margin-bottom:0.75rem">학생들의 생각 나눠봐요</h3>
+    <div id="reflect-list"></div>
+  </div>
+
+  <div class="btn-row" style="margin-top:1.25rem"><button class="btn btn-danger" onclick="clearAll()">전체 초기화</button></div>
+</div>
+
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getFirestore, collection, addDoc, getDocs, doc, updateDoc, deleteDoc, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+const firebaseConfig={apiKey:"AIzaSyAt28Q6pps1hdsKIUrRUJrSVFz86pwnGM4",authDomain:"emoji-quiz-class.firebaseapp.com",projectId:"emoji-quiz-class",storageBucket:"emoji-quiz-class.firebasestorage.app",messagingSenderId:"123310343077",appId:"1:123310343077:web:29020738661a071ac7de4c"};
+const app=initializeApp(firebaseConfig);
+const db=getFirestore(app);
+const COL="emojiQuizSubmissions";
+
+async function dbLoad(){const q=query(collection(db,COL),orderBy("ts","asc"));const s=await getDocs(q);return s.docs.map(d=>({_id:d.id,...d.data()}))}
+async function dbAdd(data){return(await addDoc(collection(db,COL),data)).id}
+async function dbUpdate(id,data){await updateDoc(doc(db,COL,id),data)}
+async function dbDelAll(){const s=await getDocs(collection(db,COL));await Promise.all(s.docs.map(d=>deleteDoc(doc(db,COL,d.id))))}
+
+// ── 규칙 ─────────────────────────────────────────────
+const RULES=[
+  {country:"중국",cls:"cn",flag:"🇨🇳",rules:[
+    {id:"cn1",text:"점심을 먹고 나서 학교에서 낮잠을 자요 (2시간!)"},
+    {id:"cn2",text:"쉬는 시간마다 눈을 손가락으로 꾹꾹 눌러요 (눈 마사지 체조!)"},
+    {id:"cn3",text:"교복이 운동복이에요. 매일 체육복 차림으로 학교에 와요"},
+  ]},
+  {country:"우크라이나",cls:"ua",flag:"🇺🇦",rules:[
+    {id:"ua1",text:"개학날(9월 1일) 선생님께 꽃다발을 선물해요"},
+    {id:"ua2",text:"1학년부터 12학년까지 모두 같은 학교 건물을 다녀요"},
+    {id:"ua3",text:"성적표 점수가 최고 12점이에요 (한국은 100점!)"},
+  ]},
+  {country:"몽골",cls:"mn",flag:"🇲🇳",rules:[
+    {id:"mn1",text:"학교 이름이 번호예요. '23번 학교'처럼 숫자로 불러요"},
+    {id:"mn2",text:"방과후에 말타기와 활쏘기 같은 전통 활동을 배워요"},
+    {id:"mn3",text:"오전 반과 오후 반이 같은 교실을 번갈아 써요"},
+  ]},
+  {country:"베트남",cls:"vn",flag:"🇻🇳",rules:[
+    {id:"vn1",text:"교복 목에 빨간 삼각 머플러를 매요"},
+    {id:"vn2",text:"여름방학이 3달이나 돼요!"},
+    {id:"vn3",text:"한 반에 학생이 50명이 넘어요"},
+  ]},
+];
+
+// ── 이모지 카테고리 (확장판) ──────────────────────────
+const EMOJI_CATS=[
+  {label:"학교·공부",list:["🏫","📚","✏️","📝","📖","🎒","🏆","📊","🔔","📋","🖊️","📓","📐","🎓","🔖","📌","🗂️","🖋️"]},
+  {label:"숫자 (1~12, 50)",list:["1️⃣","2️⃣","3️⃣","4️⃣","5️⃣","6️⃣","7️⃣","8️⃣","9️⃣","🔟","1️⃣1️⃣","1️⃣2️⃣","5️⃣0️⃣","#️⃣","🔢","💯"]},
+  {label:"시간·날짜",list:["⏰","🕐","🕑","🕛","⌚","⏱️","📅","🗓️","🌅","🌙","🌞","☀️","🌤️","🌝"]},
+  {label:"같다·이름·번호",list:["🟰","⚖️","🪞","🔄","♻️","🔁","🏷️","📛","🪪","🔖","📌","📍","🗓️","🔢","#️⃣","1️⃣","2️⃣","3️⃣"]},
+  {label:"몸·눈·손",list:["👀","👁️","💆","🫳","🤲","👆","☝️","🤙","✋","🖐️","💪","👏","🙌","🤸","🧘","🏃","🚶","😴","💤","🥱","😮","😲","😊","🤔","😌","👋","💆","🫶"]},
+  {label:"점심·음식",list:["🍜","🍚","🍱","🥢","🍽️","🥗","🍛","🥘","🍲","🍣","🥪","🍴","🥄","🧃","🍶","🍱","🥡","🧆","🥩","🍳"]},
+  {label:"잠·휴식",list:["😴","💤","🛌","🛏️","🌙","🌛","🌚","🥱","💭","🛋️","🧸","🌜","😪","🌃","🌉"]},
+  {label:"꽃·선물·개학",list:["🌸","🌷","🌹","💐","🌺","🌻","🌼","🥀","🌿","🍃","🎁","🎀","💝","🎊","🎉","🎗️","💌","🎈","🪷","🫧"]},
+  {label:"여름·계절·날씨",list:["☀️","🌞","🌻","🏖️","🌊","🌴","🍦","🍉","😎","🌅","🌈","⛅","🌤️","🌡️","🌬️","❄️","☃️","🥶","🌨️","🍂","🌾","🍁","🌱","🌿"]},
+  {label:"옷·교복·색깔",list:["👕","🎽","👔","🧣","🎀","👗","🧥","🩳","👖","👒","🪢","🪡","🔴","🟥","🟦","🟨","⚪","⬛","🟠","🟢","🟣","🩺","🩹"]},
+  {label:"건물·장소",list:["🏫","🏢","🏠","🏡","🚪","🪟","🏘️","🌆","🌇","🏗️","🗺️","📍","🚌","🚶","🚸","🛤️","🏕️","🏙️"]},
+  {label:"말·전통·활쏘기",list:["🐎","🐴","🏇","🏹","🎯","🥊","🤼","🏋️","🤺","🎠","🎡","🌾","🏔️","⛺","🏕️","🌿","🍃","🪶","🪃","🎣","🏅"]},
+  {label:"사람·무리",list:["👥","👨‍👩‍👧","👨‍👩‍👧‍👦","🧑‍🤝‍🧑","👫","👬","👭","🤝","🫂","👋","🙋","🙆","🧑‍🎓","👨‍🏫","👩‍🏫","🧒","👦","👧","🧑","👪"]},
+  {label:"방향·순서",list:["➡️","⬅️","⬆️","⬇️","🔄","🔃","↩️","🔁","🔀","↔️","↕️","🔛","🔜","🔝","⚡","✅","⭕","❌","❓","💡","⚠️","🔼","🔽"]},
+  {label:"감정·반응",list:["😮","😲","🤩","😍","🥺","😅","😂","🤣","😎","🥳","🎉","✨","💥","❤️","💙","💛","🧡","💚","💜","🤍","🌟","⭐","💫","🔥"]},
+];
+
+// ── 세션 유지 ─────────────────────────────────────────
+const SS=sessionStorage;
+const sg=(k,d)=>{try{const v=SS.getItem(k);return v?JSON.parse(v):d}catch{return d}};
+const ss=(k,v)=>{try{SS.setItem(k,JSON.stringify(v))}catch{}};
+
+let sName=sg("sName","");
+let selRule=sg("selRule",null);
+let pickedEmojis=sg("pickedEmojis",[]);
+let myQuizIds=sg("myQuizIds",[]);
+let presId=null;
+
+function showLoading(v){document.getElementById("fb-loading").classList.toggle("show",v)}
+
+function go(id){
+  document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
+  if(id==="s-done")renderMyQuizzes();
+}
+window.go=go;
+
+function setMode(m,el){
+  document.querySelectorAll(".mtab").forEach(t=>t.classList.remove("on"));el.classList.add("on");
+  document.getElementById("d-student").style.display=m==="student"?"block":"none";
+  document.getElementById("d-teacher").style.display=m==="teacher"?"block":"none";
+}
+window.setMode=setMode;
+
+// ── 학생 ─────────────────────────────────────────────
+function startStudent(){
+  const n=document.getElementById("sname").value.trim();
+  if(!n){alert("이름을 입력해 주세요!");return}
+  sName=n;ss("sName",n);buildRules();go("s-rule");
+}
+window.startStudent=startStudent;
+
+function buildRules(){
+  const g=document.getElementById("rule-grid");g.innerHTML="";
+  RULES.forEach(c=>c.rules.forEach(rule=>{
+    const d=document.createElement("div");d.className="rule-card";d.dataset.id=rule.id;
+    d.innerHTML=`<div class="ctry"><span class="badge ${c.cls}">${c.flag} ${c.country}</span></div><div class="rtxt">${rule.text}</div>`;
+    d.onclick=()=>{document.querySelectorAll(".rule-card").forEach(x=>x.classList.remove("selected"));d.classList.add("selected");selRule={id:rule.id,country:c.country,flag:c.flag,cls:c.cls,text:rule.text};ss("selRule",selRule)};
+    g.appendChild(d);
+  }));
+  if(selRule){document.querySelectorAll(".rule-card").forEach(d=>{if(d.dataset.id===selRule.id)d.classList.add("selected")})}
+}
+
+function toEmoji(){
+  if(!selRule){alert("규칙을 하나 골라 주세요!");return}
+  // sticky 규칙 카드 업데이트
+  document.getElementById("sticky-badge").innerHTML=`<span class="badge ${selRule.cls}">${selRule.flag} ${selRule.country}</span>`;
+  document.getElementById("sticky-text").textContent=selRule.text;
+  buildPicker();restorePickedEmojis();restoreTextareas();setupTextareaAutoSave();go("s-emoji");
+}
+window.toEmoji=toEmoji;
+
+function buildPicker(){
+  const g=document.getElementById("epicker");g.innerHTML="";
+  EMOJI_CATS.forEach(cat=>{
+    const lbl=document.createElement("div");lbl.className="emoji-section-label";lbl.textContent=cat.label;g.appendChild(lbl);
+    const row=document.createElement("div");row.className="emoji-pool";
+    [...new Set(cat.list)].forEach(e=>{
+      const b=document.createElement("button");b.className="ebtn";b.textContent=e;
+      // 클릭할 때마다 추가 (중복 가능), 이미 선택된 건 used 표시만
+      b.onclick=()=>addEmoji(e,b);
+      row.appendChild(b);
+    });
+    g.appendChild(row);
+  });
+}
+
+function restorePickedEmojis(){
+  // used 표시 복원 (선택된 이모지 종류에 해당하는 버튼에 used 클래스)
+  const used=new Set(pickedEmojis);
+  document.querySelectorAll(".ebtn").forEach(b=>{
+    if(used.has(b.textContent))b.classList.add("used");
+    else b.classList.remove("used");
+  });
+  updateBottomBar();updateInsertBars();
+}
+
+function restoreTextareas(){
+  ["q1","q2","q3"].forEach(id=>{const v=sg("ta_"+id,"");const el=document.getElementById(id);if(el&&v)el.value=v});
+  updateInsertBars();
+}
+
+function setupTextareaAutoSave(){
+  ["q1","q2","q3"].forEach(id=>{
+    const el=document.getElementById(id);if(!el||el._asSaved)return;el._asSaved=true;
+    el.addEventListener("input",()=>ss("ta_"+id,el.value));
+  });
+}
+
+// 클릭마다 추가 (같은 이모지 여러 번 가능)
+function addEmoji(e,btn){
+  pickedEmojis.push(e);
+  btn.classList.add("used");
+  ss("pickedEmojis",pickedEmojis);updateBottomBar();updateInsertBars();
+}
+
+window.removeLastEmoji=function(){
+  if(!pickedEmojis.length)return;
+  const last=pickedEmojis.pop();
+  // 해당 이모지가 더 이상 없으면 used 제거
+  if(!pickedEmojis.includes(last)){
+    document.querySelectorAll(".ebtn").forEach(b=>{if(b.textContent===last)b.classList.remove("used")});
+  }
+  ss("pickedEmojis",pickedEmojis);updateBottomBar();updateInsertBars();
+};
+
+window.clearEmojis=function(){
+  pickedEmojis=[];ss("pickedEmojis",[]);
+  document.querySelectorAll(".ebtn").forEach(b=>b.classList.remove("used"));
+  updateBottomBar();updateInsertBars();
+};
+
+function updateBottomBar(){
+  const el=document.getElementById("bar-emoji-txt"),cnt=document.getElementById("bar-cnt");
+  if(!el)return;
+  el.innerHTML=pickedEmojis.length?`<span>${pickedEmojis.join(" ")}</span>`:`<span class="bar-empty">이모지를 고르면 여기에 따라와요</span>`;
+  if(cnt)cnt.textContent=`${pickedEmojis.length}개 선택`;
+}
+
+function updateInsertBars(){
+  const bids=["bar-q1","bar-q2","bar-q3"];const tids=["q1","q2","q3"];
+  const u=[...new Set(pickedEmojis)];
+  bids.forEach((bid,i)=>{
+    const bar=document.getElementById(bid);if(!bar)return;
+    bar.innerHTML=`<div class="bar-label">${u.length?"눌러서 글 안에 넣어요 →":"이모지를 먼저 골라야 나타나요"}</div>`;
+    u.forEach(e=>{const b=document.createElement("button");b.className="ins-btn";b.textContent=e;b.tabIndex=-1;b.onmousedown=ev=>{ev.preventDefault();insertEmoji(tids[i],e)};bar.appendChild(b)});
+    if(u.length){const d=document.createElement("button");d.className="backspace-btn";d.textContent="← 지우기";d.tabIndex=-1;d.onmousedown=ev=>{ev.preventDefault();deleteLast(tids[i])};bar.appendChild(d)}
+  });
+}
+
+function insertEmoji(id,emoji){const ta=document.getElementById(id);if(!ta)return;const s=ta.selectionStart,e=ta.selectionEnd;ta.value=ta.value.slice(0,s)+emoji+ta.value.slice(e);ta.selectionStart=ta.selectionEnd=s+emoji.length;ta.focus();ss("ta_"+id,ta.value)}
+function deleteLast(id){const ta=document.getElementById(id);if(!ta)return;const s=ta.selectionStart;if(ta.selectionStart!==ta.selectionEnd){ta.value=ta.value.slice(0,ta.selectionStart)+ta.value.slice(ta.selectionEnd);ta.selectionStart=ta.selectionEnd=ta.selectionStart}else if(s>0){const txt=ta.value;let d=1;if(s>=2){const cp=txt.codePointAt(s-2);if(cp>0xFFFF)d=2}ta.value=txt.slice(0,s-d)+txt.slice(s);ta.selectionStart=ta.selectionEnd=s-d}ta.focus();ss("ta_"+id,ta.value)}
+
+// ── 퀴즈 제출 ─────────────────────────────────────────
+window.submitOneQuiz=async function(){
+  if(pickedEmojis.length<2){alert("이모지를 2개 이상 골라 주세요!");return}
+  const q1=document.getElementById("q1").value.trim();
+  const q2=document.getElementById("q2").value.trim();
+  if(!q1){alert("질문 1에 대답해 주세요!");return}
+  if(!q2){alert("질문 2에 대답해 주세요!");return}
+  showLoading(true);
+  try{
+    const id=await dbAdd({name:sName,rule:selRule,emojis:pickedEmojis.join(" "),q1,q2,q3:document.getElementById("q3").value.trim(),bFriend:"",bReason:"",reflection:"",ts:Date.now()});
+    myQuizIds.push(id);ss("myQuizIds",myQuizIds);
+    pickedEmojis=[];ss("pickedEmojis",[]);selRule=null;ss("selRule",null);
+    ["q1","q2","q3"].forEach(f=>{const el=document.getElementById(f);if(el)el.value="";ss("ta_"+f,"")});
+    go("s-done");
+  }catch(e){alert("저장 오류: "+e.message)}
+  finally{showLoading(false)}
+};
+
+window.goMakeMore=function(){buildRules();go("s-rule")};
+
+async function renderMyQuizzes(){
+  const wrap=document.getElementById("my-quizzes-list");if(!wrap)return;
+  if(!myQuizIds.length){wrap.innerHTML=`<div style="font-size:13px;color:#aaa;padding:0.25rem 0">아직 낸 퀴즈가 없어요.</div>`;return}
+  try{
+    const all=await dbLoad();
+    const mine=all.filter(s=>myQuizIds.includes(s._id));
+    wrap.innerHTML="";
+    mine.forEach((s,i)=>{
+      const d=document.createElement("div");d.className="my-quiz-item";
+      d.innerHTML=`<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.375rem"><span style="font-size:12px;font-weight:600;color:#378ADD">퀴즈 ${i+1}</span><span class="badge ${s.rule.cls}">${s.rule.flag} ${s.rule.country}</span></div><div class="my-quiz-emoji">${s.emojis}</div><div style="font-size:12px;color:#888;line-height:1.5">${s.rule.text}</div>`;
+      wrap.appendChild(d);
+    });
+    if(!mine.length)wrap.innerHTML=`<div style="font-size:13px;color:#aaa">불러오기 실패</div>`;
+  }catch{wrap.innerHTML=`<div style="font-size:13px;color:#aaa">불러오기 실패</div>`}
+}
+
+// ── 성찰 저장 ─────────────────────────────────────────
+window.saveFinalReflect=async function(){
+  const refl=document.getElementById("reflection").value.trim();
+  if(!refl){alert("오늘 느낀 점을 써 주세요!");return}
+  showLoading(true);
+  try{
+    if(myQuizIds.length){
+      await dbUpdate(myQuizIds[myQuizIds.length-1],{bFriend:document.getElementById("bfriend").value.trim(),bReason:document.getElementById("breason").value.trim(),reflection:refl});
+    }
+    alert("수고했어요! 완료됐어요 🎉");
+  }catch(e){alert("오류: "+e.message)}
+  finally{showLoading(false)}
+};
+
+// ── 선생님 ─────────────────────────────────────────────
+window.startTeacher=async function(){await loadTeacher();go("s-teacher")};
+
+window.switchTeacherTab=function(tab,el){
+  document.querySelectorAll(".ttab").forEach(t=>t.classList.remove("on"));el.classList.add("on");
+  document.getElementById("teacher-quiz-panel").style.display=tab==="quiz"?"block":"none";
+  document.getElementById("teacher-reflect-panel").style.display=tab==="reflect"?"block":"none";
+  if(tab==="reflect")renderReflectList();
+};
+
+window.loadTeacher=async function(){
+  document.getElementById("qlist").innerHTML=`<div class="loading-msg">불러오는 중...</div>`;
+  showLoading(true);
+  try{
+    const subs=await dbLoad();
+    document.getElementById("t-total").textContent=subs.length;
+    document.getElementById("t-ctry").textContent=new Set(subs.map(s=>s.rule.country)).size;
+    const votes={};subs.forEach(s=>{if(s.bFriend)votes[s.bFriend]=(votes[s.bFriend]||0)+1});
+    const top=Object.keys(votes).sort((a,b)=>votes[b]-votes[a])[0];
+    document.getElementById("t-top").textContent=top?`${top}(${votes[top]}표)`:"—";
+    const ql=document.getElementById("qlist");ql.innerHTML="";
+    if(!subs.length){ql.innerHTML=`<div class="info-box">아직 제출된 퀴즈가 없어요!</div>`;return}
+    subs.forEach(s=>{
+      const d=document.createElement("div");d.className="qitem";
+      d.innerHTML=`
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.5rem">
+          <span style="font-weight:600;font-size:14px">${s.name}</span>
+          <span class="rtag">${s.rule.flag} ${s.rule.country}</span>
+        </div>
+        <div style="font-size:30px;letter-spacing:6px;text-align:center;padding:0.75rem 0.5rem;background:#f8f8f8;border-radius:8px;margin:0.25rem 0">${s.emojis}</div>
+        <div class="qitem-hint">클릭해서 크게 보기 →</div>`;
+      d.onclick=()=>openModal(s);
+      ql.appendChild(d);
+    });
+  }catch(e){alert("불러오기 오류: "+e.message)}
+  finally{showLoading(false)}
+};
+
+// 생각나눠봐요 목록
+let cachedSubs=[];
+async function renderReflectList(){
+  const wrap=document.getElementById("reflect-list");
+  wrap.innerHTML=`<div class="loading-msg">불러오는 중...</div>`;
+  try{
+    const subs=await dbLoad();cachedSubs=subs;
+    const withReflect=subs.filter(s=>s.reflection||s.bFriend||s.bReason);
+    if(!withReflect.length){wrap.innerHTML=`<div class="info-box">아직 작성된 내용이 없어요.</div>`;return}
+    wrap.innerHTML="";
+    withReflect.forEach(s=>{
+      const d=document.createElement("div");d.className="reflect-item";
+      d.innerHTML=`
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.75rem">
+          <span style="font-weight:600;font-size:14px">${s.name}</span>
+          <span class="rtag">${s.rule.flag} ${s.rule.country}</span>
+        </div>
+        ${s.bFriend?`<div class="reflect-field">👍 가장 이해하기 쉬웠던 친구</div><div class="reflect-val" style="margin-bottom:0.625rem">${s.bFriend}</div>`:""}
+        ${s.bReason?`<div class="reflect-field">💬 이유</div><div class="reflect-val" style="margin-bottom:0.625rem">${s.bReason}</div>`:""}
+        ${s.reflection?`<div class="reflect-field">✏️ 오늘 배운 것, 느낀 것</div><div class="reflect-val">${s.reflection}</div>`:""}`;
+      wrap.appendChild(d);
+    });
+  }catch(e){wrap.innerHTML=`<div class="info-box" style="color:#888">불러오기 오류: ${e.message}</div>`}
+}
+
+// ── 모달 ─────────────────────────────────────────────
+function openModal(s){
+  presId=s._id;
+  document.getElementById("modal-badge-wrap").innerHTML=`<span class="badge ${s.rule.cls}">${s.rule.flag} ${s.rule.country}</span> <span style="font-size:13px;color:#888;margin-left:6px">${s.name}</span>`;
+  document.getElementById("modal-emoji-display").textContent=s.emojis;
+  document.getElementById("modal-rule-text").textContent=s.rule.text;
+  document.getElementById("modal-q1-text").textContent=s.q1||"(없음)";
+  document.getElementById("modal-q2-text").textContent=s.q2||"(없음)";
+  document.getElementById("modal-answer-section").style.display="none";
+  document.getElementById("modal-reveal-btn").style.display="block";
+  document.getElementById("quiz-modal").classList.add("show");
+}
+window.handleModalClick=function(e){if(e.target===document.getElementById("quiz-modal"))closeModal()};
+window.closeModal=function(){document.getElementById("quiz-modal").classList.remove("show")};
+window.revealModalAnswer=function(){
+  document.getElementById("modal-answer-section").style.display="block";
+  document.getElementById("modal-reveal-btn").style.display="none";
+};
+window.clearAll=async function(){
+  if(!confirm("모든 데이터를 지울까요?"))return;
+  showLoading(true);
+  try{await dbDelAll();presId=null;await loadTeacher()}
+  catch(e){alert("오류: "+e.message)}
+  finally{showLoading(false)}
+};
+
+// ── 시작 시 상태 복원 ─────────────────────────────────
+if(sName)document.getElementById("sname").value=sName;
+</script>
+</body>
+</html>
